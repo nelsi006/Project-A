@@ -162,8 +162,12 @@ void UserProfile::getRecommendations(const Song songDatabase[], int numSongs) co
             found = true;
         }
     }
-}
-//***********************************************************
+
+    if (!found)
+    {
+        cout << "  No songs found matching your preferred genre.\n";
+    }
+} //***********************************************************
 // Have the user update their preferred genre
 //***********************************************************
 void UserProfile::updatePreferences()

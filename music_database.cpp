@@ -11,6 +11,8 @@ const int MAX_SONGS = 50;
 
 void displayMenu()
 {
+
+
     cout << "\nChoose your option!\n";
     cout << "1. Add Song to Playlist\n";
     cout << "2. View All Songs\n";
