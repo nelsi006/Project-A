@@ -22,6 +22,7 @@ public:
     }
     // Constructor with parameters
     Song(string, string, string, int);
+    static void removeSong(Song *&songDatabase, int &numSongs);
 
     void setTitle(string);
     void setArtist(string);
@@ -48,9 +49,9 @@ public:
         return popularity;
     }
 
-    static void loadSongsFromFile(Song songDatabase[], int &numSongs);
-    static void saveSongsToFile(const Song songDatabase[], int numSongs);
-    static void displaySongs(const Song songDatabase[], int numSongs);
+    static void displaySongs(const Song *songDatabase, int numSongs);
+    static void saveSongsToFile(const Song *songDatabase, int numSongs);
+    static void loadSongsFromFile(Song *&songDatabase, int &numSongs);
 };
 
 class UserProfile
@@ -68,7 +69,7 @@ public:
         return preferredGenre;
     }
 
-    void updatePreferences(); // can hace the user update their preferred genre
+    void updatePreferences(); // can have the user update their preferred genre
     void getRecommendations(const Song songDatabase[], int numSongs) const;
     // will find matching songs based on the users preferred genre
 };
