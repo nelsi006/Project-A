@@ -9,7 +9,7 @@
 using namespace std;
 
 //***********************************************************
-// The Song constructor createss a Song object.
+// The Song constructor creates a Song object.
 // Parameters are title, artist, genre, and popularity
 //***********************************************************
 Song::Song(string t, string a, string g, int p)
@@ -51,7 +51,7 @@ void Song::setPopularity(int p)
 }
 
 //***********************************************************
-// UserProfile constructor innitializes preferredGenre
+// UserProfile constructor initializes preferredGenre
 //***********************************************************
 UserProfile::UserProfile(string g)
 {
@@ -69,7 +69,7 @@ void UserProfile::setPreferredGenre(string g)
 //***********************************************************
 // Reads songs.txt file and creates song objects
 //***********************************************************
-void Song::loadSongsFromFile(Song songDatabase[], int &numSongs)
+void Song::loadSongsFromFile(Song *&songDatabase, int &numSongs)
 {
     string title, artist, genre;
     int popularity;
@@ -81,14 +81,29 @@ void Song::loadSongsFromFile(Song songDatabase[], int &numSongs)
         cout << "No songs in your playlist.\n";
         return;
     }
-    // Reads songs.txt file and creates song objects until max 50 songs
-    while (getline(dataIn, title) && numSongs < 50)
+    // Count number of songs in the file
+
+    int count = 0;
+    string line;
+    while (getline(dataIn, line))
+    {
+        count++;
+    }
+    count = count / 4; // 4 lines per song
+
+    // Allocate memory
+    songDatabase = new Song[count];
+    dataIn.clear();
+    dataIn.seekg(0);
+
+    numSongs = 0;
+    while (getline(dataIn, title))
     {
         getline(dataIn, artist);
         getline(dataIn, genre);
         dataIn >> popularity;
         dataIn.ignore();
-        // Creates song objects and stores them in songDatabase array
+
         songDatabase[numSongs++] = Song(title, artist, genre, popularity);
     }
     dataIn.close();
@@ -98,7 +113,7 @@ void Song::loadSongsFromFile(Song songDatabase[], int &numSongs)
 // Saves songs to songs.txt file
 //***********************************************************
 
-void Song::saveSongsToFile(const Song songDatabase[], int numSongs)
+void Song::saveSongsToFile(const Song *songDatabase, int numSongs)
 {
     ofstream dataOut;
     dataOut.open("songs.txt");
@@ -119,31 +134,65 @@ void Song::saveSongsToFile(const Song songDatabase[], int numSongs)
     dataOut.close();
     cout << "Songs saved successfully!\n";
 }
+
+void Song::removeSong(Song *&songDatabase, int &numSongs)
+{
+    if (numSongs == 0)
+    {
+        cout << "No songs to remove.\n";
+        return;
+    }
+
+    cout << "Enter song number to remove (1-" << numSongs << "): ";
+    int index;
+    cin >> index;
+    index--; 
+
+    if (index >= 0 && index < numSongs)
+    {
+        Song *newDatabase = new Song[numSongs - 1];
+
+        // Copy all songs except the removed one
+        for (int i = 0, j = 0; i < numSongs; i++)
+        {
+            if (i != index)
+            {
+                newDatabase[j++] = songDatabase[i];
+            }
+        }
+
+        delete[] songDatabase;
+        songDatabase = newDatabase;
+        numSongs--;
+    }
+}
+
 //***********************************************************
 // Displays songs in playlist in nice format
 //***********************************************************
 void Song::displaySongs(const Song songDatabase[], int numSongs)
 {
     cout << "\nCurrent Playlist:\n";
-    cout << setw(30) << left << "Title"
+    cout << setw(5) << left << "#"
+         << setw(30) << "Title"
          << setw(25) << "Artist"
          << setw(35) << "Genre"
          << "Popularity\n";
     cout << string(100, '*') << endl;
-    // all songs data alignled nicley in columns
+    // all songs data aligned nicely in columns
     for (int i = 0; i < numSongs; i++)
     {
-        cout << setw(30) << left << songDatabase[i].getTitle()
+        cout << setw(5) << left << (i + 1) // to add number on left side of songs
+             << setw(30) << left << songDatabase[i].getTitle()
              << setw(25) << songDatabase[i].getArtist()
              << setw(35) << songDatabase[i].getGenre()
              << songDatabase[i].getPopularity() << endl;
     }
 }
-
 // ***********************************************************
-// Gathers "song reccomendations" based on user's preferred genre
+// Gathers "song recommendations" based on user's preferred genre
 //***********************************************************
-void UserProfile::getRecommendations(const Song songDatabase[], int numSongs) const
+void UserProfile::getRecommendations(const Song *songDatabase, int numSongs) const
 { // Check if there are any songs in the database
     if (numSongs == 0)
     {
@@ -162,12 +211,8 @@ void UserProfile::getRecommendations(const Song songDatabase[], int numSongs) co
             found = true;
         }
     }
-
-    if (!found)
-    {
-        cout << "  No songs found matching your preferred genre.\n";
-    }
-} //***********************************************************
+}
+//***********************************************************
 // Have the user update their preferred genre
 //***********************************************************
 void UserProfile::updatePreferences()
